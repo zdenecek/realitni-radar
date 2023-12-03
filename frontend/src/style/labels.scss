@@ -1,0 +1,101 @@
+
+
+.top-labels.v-chip-group {
+    color: white;
+    font-weight: bold;
+    display: flex;
+    gap: 10px;
+    padding: 0;
+
+    .top-label.v-chip {
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .top-label-prop-1 {
+        background: #003f5c;
+    }
+
+    .top-label-prop-2 {
+        background: #58508d;
+    }
+
+    .top-label-prop-3 {
+        background: #bc5090;
+    }
+
+    .top-label-prop-4 {
+        background: #ff6361;
+    }
+
+    .top-label-prop-5 {
+        background: #ffa600;
+    }
+
+    .top-label-deal-1 {
+        background-color: #bbd700;
+    }
+
+    .top-label-deal-2 {
+        background-color: #7385de;
+    }
+
+    .top-label-deal-3 {
+        background-color: #00aeef;
+    }
+
+    .top-label-deal-4 {
+        background-color: #00efe7;
+    }
+
+    .top-label-ownership-1 {
+        background-color: green;
+    }
+
+    .top-label-ownership-2 {
+        background-color: rgb(123, 205, 0);
+    }
+
+    .top-label-ownership-3 {
+        background-color: darkkhaki;
+    }
+
+    .top-label-ownership-3 {
+        background-color: olive;
+    }
+
+
+    .top-label-price-drop-50,
+    .top-label-price-drop-40,
+    .top-label-price-drop-30 {
+        background-color: red;
+    }
+
+    .top-label-price-drop-25 {
+        background-color: lighten($color: darkred, $amount: 0);
+    }
+
+    .top-label-price-drop-20 {
+        background-color: lighten($color: darkred, $amount: 10);
+    }
+
+    .top-label-price-drop-15 {
+        background-color: lighten($color: darkred, $amount: 20);
+    }
+
+    .top-label-price-drop-10 {
+        background-color: lighten($color: darkred, $amount: 40);
+    }
+
+    .top-label-price-drop-7 {
+        background-color: lighten($color: darkred, $amount: 50);
+    }
+
+    .top-label-price-drop-3 {
+        background-color: lighten($color: darkred, $amount: 60);
+    }
+
+    .top-label-sub {
+        background-color: brown;
+    }
+}

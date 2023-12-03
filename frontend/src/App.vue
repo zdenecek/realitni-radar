@@ -4,6 +4,13 @@
   </v-app>
 </template>
 
-<script setup lang="ts">
-  import HelloWorld from '@/components/HelloWorld.vue'
-</script>
+
+<style>
+@import "@/style/utils.scss";
+.label {
+    margin-bottom: 0.2em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+</style>

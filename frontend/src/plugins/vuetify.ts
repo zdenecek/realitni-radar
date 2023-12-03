@@ -13,12 +13,39 @@ import { createVuetify } from 'vuetify'
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
+
+  defaults: {
+    global: {
+      ripple: false,
+    },
+    VTextField: {
+      variant: 'outlined',
+      density: 'compact',
+      hideSpinButtons: true,
+      hideDetails: "auto",
+    },
+    VChip: {
+      variant: 'outlined',
+      density: 'comfortable',
+    },
+    VIcon: {
+      color: 'secondary'
+    },
+    VInput: {
+      density: 'compact',
+      hideDetails: "auto",
+    },
+    VBtn: {
+      variant: 'outlined',
+      size: 'small',
+    },  
+  },
   theme: {
     themes: {
       light: {
         colors: {
-          primary: '#1867C0',
-          secondary: '#5CBBF6',
+          primary: '#01579B',
+          secondary: '#1daeff',
         },
       },
     },

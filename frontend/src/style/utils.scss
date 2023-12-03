@@ -1,0 +1,38 @@
+.flex {
+    display: flex;
+    gap: 4px 4px;
+}
+
+.flex.spaced {
+    gap: 4px 32px;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.content-start {
+    justify-content: flex-start;
+}
+
+.aling-center {
+    align-items: center;
+}
+
+.gap-1 {
+    gap: 1em;
+
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.no-caps {
+    text-transform: initial !important;
+}
+
+
+.container {
+    max-width: 760px;
+}

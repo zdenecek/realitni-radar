@@ -1,0 +1,14 @@
+.animation-wrapper {
+    overflow: hidden;
+}
+
+
+.expand-enter-active,
+.expand-leave-active {
+    transition: all 1s ease-in-out;
+}
+.expand-enter-from,
+.expand-leave-to {
+    transform: translateY(-100%);
+    opacity: 0;
+}
