@@ -4,12 +4,15 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
 
 // Utilities
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
+export default ({ mode}) => {
+
+  process.env = {...process.env, ...loadEnv(mode, process.cwd())};
+  
+  return defineConfig({plugins: [
     vue({
       template: { transformAssetUrls },
     }),
@@ -28,6 +31,9 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    outDir: process.env.OUT_PATH
+  },
   define: { 'process.env': {} },
   resolve: {
     alias: {
@@ -42,4 +48,4 @@ export default defineConfig({
       '/api':  'http://sreality.zdenektomis.eu/',
     }
   },
-})
+})};

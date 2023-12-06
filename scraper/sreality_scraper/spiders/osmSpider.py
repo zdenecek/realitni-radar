@@ -11,7 +11,7 @@ class AddressSpider(scrapy.Spider):
 
     custom_settings = {
         'LOG_LEVEL': 'INFO',
-        'LOG_FILE': os.path.join(os.getenv("LOG_DIR"), f"address-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"),
+        'LOG_FILE': os.path.join(os.getenv("LOG_DIR"), "address-spider.log"),
         'AUTOTHROTTLE_ENABLED':  True,
         'DOWNLOAD_DELAY': 1.6,
         'RANDOMIZE_DOWNLOAD_DELAY': False
@@ -26,6 +26,8 @@ class AddressSpider(scrapy.Spider):
 
         query = {"deleted": {"$exists": False}, "location": {
             "$exists": True}, "addressData": {"$exists": False}}
+        
+        self.logger.info(f"Starting address scraping with {self.coll.count_documents(query)} items")
 
         yield from self.find_listings(query)
 

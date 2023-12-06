@@ -1,25 +1,25 @@
 server {
 
-        root /var/www/sreality/html;
-        index index.html index.htm index.nginx-debian.html;
+    root /var/www/radar;
+    index index.html index.htm index.nginx-debian.html;
 
-        server_name realitni-radar.zdenektomis.eu www.realitni-radar;
+    server_name realitni-radar.zdenektomis.eu www.realitni-radar;
 
-	    location / {
-           try_files $uri $uri/ /index.html; 
-        }
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 
 
-        location /api/ {
-               proxy_pass http://localhost:3000;
-               proxy_http_version 1.1;
-               proxy_set_header Upgrade $http_upgrade;
-               proxy_set_header Connection 'upgrade';
-               proxy_set_header Host $host;
-               proxy_cache_bypass $http_upgrade;
-               proxy_cache off;
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_cache off;
 
-               add_header Cache-Control no-cache;
-               expires off;
-           }
+        add_header Cache-Control no-cache;
+        expires off;
+    }
 }

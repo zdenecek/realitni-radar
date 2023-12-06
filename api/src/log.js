@@ -8,7 +8,7 @@ const logger = winston.createLogger({
             silent: false,
             colorize: true,
             timestamp: true,
-            filename: "log.log",
+            filename: process.env.LOG_FILE || "log.log",
         }),
         new winston.transports.Console({
             level: "trace",
