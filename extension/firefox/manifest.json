@@ -1,0 +1,16 @@
+{
+    "name": "Sreality manager extension",
+    "version": "1.0.1",
+    "description": "Open Sreality manager directly from Sreality listings",
+    "permissions": ["activeTab"],
+    "browser_action": {
+        "default_icon": {
+            "16": "img/favicon-16x16.png",
+            "32": "img/favicon-32x32.png"
+        }
+    },
+    "background": {
+        "scripts": ["main.js"]
+    },
+    "manifest_version": 2
+}
