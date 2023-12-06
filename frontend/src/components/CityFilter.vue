@@ -8,11 +8,10 @@
                     <v-btn v-bind="props" @click="toggleLock" variant="outlined"
                         :prepend-icon="locked ? 'mdi-lock-outline' : 'mdi-lock-off-outline'"
                         :text="locked ? 'Odemknout' : 'Zamknout'">
-
                     </v-btn>
                 </template>
             </v-tooltip>
-            <v-btn @click="visible = !visible" :text="visible ? 'Skrýt' : 'Zobrazit'" size="small"
+            <v-btn @click="visible = !visible" :text="visible ? 'Skrýt' : 'Zobrazit'" 
                 :prepend-icon="visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" variant="outlined"></v-btn>
         </div>
 
@@ -26,15 +25,15 @@
                             <v-text-field class="numeric" type="number" v-model.number="range[1]" label="do"></v-text-field>
                             <loader v-show="loading" text="Načítání měst..."></loader>
                         </div>
-                        <h4 class="text-primary mt-4" v-show="!initial && !loading">Nalezená města</h4>
+                        <h4 class="text-primary mt-4" v-show="!initial && !loading">Nalezená města (celkem {{ cities.length }} měst s {{ sum }} inzeráty)</h4>
                         <div v-show="!initial && cities.length == 0 && !loading" class="flex">
                             <span>Města s takovým počtem inzerátů nejsou v databázi</span>
                         </div>
 
                     </div>
                     <div class="flex flex-col" v-show="cities.length > 0 && !loading">
-                        <div class="flex">
-                            <span>Celkem {{ cities.length }} měst s {{ sum }} inzeráty</span>
+                        <div class="flex align-center mt-2">
+                            <span class="mr-4">Vybráno {{ selectedCities.length }} měst</span>
                             <v-btn @click="toggleAll()">Vybrat všechna</v-btn>
                             <v-btn @click="toggleAll(false)">Zrušit výběr</v-btn>
                         </div>
@@ -46,9 +45,9 @@
                         <v-pagination v-show="pages > 1" class="text-primary" v-model="page" :length="pages"
                             density="compact" variant="plain"></v-pagination>
                         <div class="grid-3" v-show="cities.length > 0">
-                            <v-checkbox color="secondary" v-for="city in citiesPaginated" :key="city.postcode ?? 1"
+                            <v-checkbox color="secondary" v-for="city in citiesPaginated" :key="(city.postcode ?? 1) + (city.name ?? '') "
                                 v-model="city.selected" :label="getLabel(city)" :title="city.postcode" hide-details
-                                density="compact" size="small"></v-checkbox>
+                                density="compact"></v-checkbox>
                         </div>
                     </div>
                 </div>
@@ -75,7 +74,7 @@ const cities = ref([] as Array<CityObject>);
 const page = ref(1);
 const perPage = 24;
 const pages = computed(() => Math.ceil(citiesFiltered.value.length / perPage));
-const citiesPaginated = computed(() => citiesFiltered.value.slice((page.value - 1) * perPage, page.value * perPage));
+const citiesPaginated = computed(() => citiesFiltered.value.slice((page.value - 1) * perPage , page.value * perPage));
 const props = defineProps({
     filter: {
         type: Object as () => FilterObject,
@@ -85,6 +84,14 @@ const props = defineProps({
 function getLabel(city: CityObject) {
     return `${city.name ?? 'neznámé'} (${city.count})`;
 }
+
+const selectedCities = computed(() => [...cities.value.filter((m) => m.selected)]);
+
+watch(selectedCities, (new_val, old_val) => {
+    if (new_val.length === 0 && old_val.length === 0) return;
+    emit("update", selectedCities.value);
+}, { deep: true });
+
 
 // STATES
 const visible = ref(true);
@@ -124,7 +131,7 @@ function update() {
     if (min === '') min = 'undefined';
     const ranges = [`${min}-${max}`]; // there used to be the option to specify more ranges
 
-    console.debug("fetching cities", ranges);
+    console.debug("fetching cities");
 
     axios
         .get("/cities", {
@@ -170,7 +177,7 @@ function toggleLock() {
 }
 
 function toggleAll(value = true) {
-    cities.value.forEach((m) => (m.selected = value));
+    citiesFiltered.value.forEach((m) => (m.selected = value));
 }
 </script>
 

@@ -1,6 +1,6 @@
 import { LocationQuery } from "vue-router";
 import { DealType, OwnershipType, PropertyType, SubcategoryType } from "./types";
-import { LocationFilter } from "./GeoFilter";
+import { ExactLocationFilter, LocationFilter, RadiusLocationFilter } from "./LocationFilter";
 
 export type OrderingOption = "priceDrop" | "age" | "price" | "pricePerMeter";
 export type DeletedOption = "deleted" | "active" | "all";
@@ -83,20 +83,7 @@ export class FilterObject {
         /** todo sub */
 
         if (this.location) {
-            obj.loc_title = this.location.place.userData.suggestFirstRow;
-
-            if(this.location.type === "radius") {
-                obj.lat = this.location.place.userData.latitude.toString();
-                obj.lon = this.location.place.userData.longitude.toString();
-                obj.radius = this.location.radius.toString();
-            }
-            if(this.location.type === "exact") {
-                obj.bbox = this.location.place.userData.bbox.join(",");
-                obj.loc_type = this.location.place.category;
-                   
-            }
-
-           
+            Object.assign(obj, this.location.toParams());
         }
 
         if (this.orderBy.length > 0) {
@@ -146,16 +133,10 @@ export class FilterObject {
         }
 
 
-        if ("lat" in params) {
-            f.location = {
-                // @ts-ignore
-                userData: {
-                    latitude: parseFloat(params.lat as string),
-                    longitude: parseFloat(params.lon as string),
-                    suggestFirstRow: params.loc_title as string ?? `<z dřívějšího vyhledávání>`,
-                },
-                radius: parseInt(params.radius as string) ?? 1,
-            };
+        if ("loc_type" in params) {
+            f.location = ExactLocationFilter.fromParams(params);
+        } else if ('loc_radius' in params) {
+            f.location = RadiusLocationFilter.fromParams(params);
         }
 
         if ("orderBy" in params) {

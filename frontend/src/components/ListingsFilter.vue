@@ -13,16 +13,17 @@
                     <div class="search mb-2 mt-2">
                         <div class="label flex-wrap">
                             <span>Vyhledávání</span>
-                            <v-chip-group v-model="searchType" class="chips text-secondary" hide-details>
+                            <v-chip-group v-model="searchType" class="chips text-secondary" hide-details mandatory>
                                 <v-chip value="str" variant="outlined" density="compact">Text</v-chip>
                                 <v-chip value="location" variant="outlined" density="compact">V okolí</v-chip>
                                 <v-chip value="location-exact" variant="outlined" density="compact">Místo</v-chip>
                             </v-chip-group>
                         </div>
                         <div class="flex-col">
-                            <v-text-field type="text" label="Vyhledávání" v-model="filter.query"
+                            <v-text-field type="text" placeholder="Vyhledávání" v-model="filter.query"
                                 v-show="searchType == 'str'" />
-                            <geo-filter v-model="filter.location" v-show="locationSearch" :exact="locationExact"></geo-filter>
+                            <location-filter v-model="filter.location" v-show="locationSearch"
+                                :exact="locationExact"></location-filter>
                         </div>
                     </div>
                     <div v-for="[prop, labels, mainLabel] in filters">
@@ -61,15 +62,15 @@
                         <div class="label">Cena nájmu</div>
                         <div class="flex spaced flex-wrap">
                             <div class="price-filter flex flex-wrap">
-                                <v-text-field class="numeric" type="number" placeholder="kč/měsíc" label="Nájem od" clearable
-                                    v-model="filter.rentMin" min="0" step="1000" />
-                                <v-text-field class="numeric" type="number" placeholder="kč/měsíc" label="Nájem do" clearable
-                                    v-model="filter.rentMax" min="0" step="1000" />
+                                <v-text-field class="numeric" type="number" placeholder="kč/měsíc" label="Nájem od"
+                                    clearable v-model="filter.rentMin" min="0" step="1000" />
+                                <v-text-field class="numeric" type="number" placeholder="kč/měsíc" label="Nájem do"
+                                    clearable v-model="filter.rentMax" min="0" step="1000" />
                             </div>
                             <div class="price-filter flex flex-wrap">
                                 <v-text-field class="numeric" type="number" placeholder="kč/m² a měsíc" clearable
                                     label="Nájem za plochu od" v-model="filter.rentPerMeterMin" min="0" step="25" />
-                                <v-text-field class="numeric" type="number" placeholder="kč/m² a měsíc"  clearable
+                                <v-text-field class="numeric" type="number" placeholder="kč/m² a měsíc" clearable
                                     label="Nájem za plochu do" v-model="filter.rentPerMeterMax" min="0" step="25" />
 
                             </div>
@@ -89,9 +90,9 @@
                             <div class="label">Stáří inzerátu</div>
                             <div class="flex flex-wrap">
                                 <v-text-field class="numeric" type="number" label="Stáří alespoň" v-model="filter.ageMin"
-                                    placeholder="dní" min="0" clearable/>
+                                    placeholder="dní" min="0" clearable />
                                 <v-text-field class="numeric" type="number" label="Stáří nejvýše" v-model="filter.ageMax"
-                                    placeholder="dní" min="0" clearable/>
+                                    placeholder="dní" min="0" clearable />
                             </div>
                         </div>
                     </div>
@@ -112,30 +113,16 @@
                                 <v-icon icon="mdi-plus-box-outline" />
                             </v-chip>
                         </div>
-                        <div class="ordering">
+                        <div class="ordering flex flex-col mb-2">
+                            <div class="flex align-center" v-for="ordering, index in filter.orderBy" :key="ordering.key">
+                                <v-select hide-details v-model="ordering.key" :items="orderByOptions" item-value="value"
+                                    variant="outlined" density="compact" class="mr-4 ordering-select" clearable
+                                    @click:clear="filter.orderBy.splice(index, 1)" :label="filter.orderBy.length > 1 ? index + 1 + '. kritérium' : undefined" />
 
-                            <v-list>
-                                <v-list-item v-for="ordering, index in filter.orderBy" :key="ordering.key"
-                                    density="compact">
-                                    <div class="flex align-center">
-                                        <v-chip density="comfortable" class="text-red-darken-4 no-chip-pad" variant="plain"
-                                            @click="filter.orderBy.splice(index, 1)">
-                                            <v-icon icon="mdi-close-box-outline" color="red-darken-4"></v-icon>
-                                        </v-chip>
-                                        <span>{{ index + 1 }}.</span>
-                                        <v-select hide-details v-model="ordering.key" :items="orderByOptions"
-                                            item-value="value" variant="outlined" density="compact"
-                                            class="mr-4 ordering-select" />
-
-                                        <v-switch density="compact"
-                                            :label="ordering.desc ? orderByLabels[ordering.key].descLabel : orderByLabels[ordering.key].ascLabel"
-                                            hide-details v-model="ordering.desc" />
-
-                                    </div>
-
-
-                                </v-list-item>
-                            </v-list>
+                                <v-switch density="compact"
+                                    :label="ordering.desc ? orderByLabels[ordering.key].descLabel : orderByLabels[ordering.key].ascLabel"
+                                    hide-details v-model="ordering.desc" />
+                            </div>
                         </div>
 
                     </div>
@@ -158,7 +145,7 @@
                             </v-chip>
                         </div>
                         <v-chip-group multiple v-model="subcategoryFilter[prop]" class="chips">
-                            
+
                             <v-chip v-for="item in subcategoryCodes(prop)" v-show="item !== 0" :key="item" :value="item"
                                 filter variant="outlined" density="comfortable" class="text-primary">{{
                                     SubcategoryLabels[prop][item] }}</v-chip>
@@ -174,7 +161,7 @@
 
 
 <script  setup lang="ts" >
-import GeoFilter from "./GeoFilter.vue";
+import LocationFilter from "./LocationFilter.vue";
 import { DealLabels, PropertyLabels, OwnershipLabels, SubcategoryLabels, Property, PropertyCodes, PropertyType, SubcategoryCodes, OtherSubcategory } from "@/class/types";
 import { FilterObject, OrderingOption } from "@/class/FilterObject";
 import { useRouter, useRoute } from "vue-router";
@@ -194,14 +181,17 @@ watch(filter, () => {
     update();
     router.push({ query: filter.value.toParams() })
 }, { deep: true })
-onMounted(() => update())
+onMounted(() => {
+
+    update()
+})
 
 // CLEAR
 function clearFilter() {
     filter.value = new FilterObject();
     searchType.value = 'location'
     // @ts-ignore
-    Object.keys(subcategoryFilter.value).forEach( key => subcategoryFilter.value[key] = [])
+    Object.keys(subcategoryFilter.value).forEach(key => subcategoryFilter.value[key] = [])
 }
 
 // HIDE
@@ -218,7 +208,11 @@ watch(searchType, () => {
     }
 });
 onMounted(() => {
-    if (filter.value.query) searchType.value = "str";
+    filter.value = FilterObject.fromParams(route.query);
+    if (filter.value?.location?.type === 'radius') searchType.value = 'location'
+    else if (filter.value?.location?.type === 'exact') searchType.value = 'location-exact'
+    else if (filter.value?.query) searchType.value = 'str'
+    else searchType.value = 'location'
 })
 const locationSearch = computed(() => searchType.value === "location" || searchType.value === "location-exact");
 const locationExact = computed(() => searchType.value === "location-exact");
@@ -307,11 +301,12 @@ const deletedOptions = {
 .search .label {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 1em;
 }
 
 .chips {
     padding: 0;
+
     .v-chip {
         margin-top: 0;
         margin-bottom: .2em;
@@ -330,6 +325,6 @@ const deletedOptions = {
 
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 }
 </style>

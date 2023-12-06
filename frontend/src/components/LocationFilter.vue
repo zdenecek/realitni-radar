@@ -1,12 +1,11 @@
 <template>
     <div class="autocomplete">
         <div class="flex flex-start align-center">
-
             <v-autocomplete ref="input" @input="update" v-model:search="searchString" v-model="selectedLocality"
                 data-tooltip="Vyhledávání podle místa funguje na principu hledání v kruhu kolem bodu. Když se zvolí lokalita,  program dostane jeden bod, který je někde uprostřed (to platí i pro města), a pak hledá v kruhu o zadaném poloměru. Je nutné zvolit něco z našeptávače, do pole s vyhledáváním se pak doplní pouze první řádek výsledku našeptávače, to neznamená, hledá se ale opravdu podle vybrané položky. Lokality v našeptávači jsou z externího api Mapy.cz."
-                variant="outlined" density="compact" :items="suggestions.data" item-props hide-details return-object
-                item-value="userData.ruianId" :no-data-text="noSearch ? 'Zadejte hledaný termín' : 'Nenalezeno'" no-filter
-                :loading="loading" item-title="userData.suggestFirstRow">
+                variant="outlined" density="compact" :items="data" item-props hide-details return-object no-filter
+                item-value="userData.ruianId" :no-data-text="noSearch ? 'Zadejte hledaný termín' : 'Nenalezeno'"
+                :loading="loading" item-title="userData.suggestFirstRow" placeholder="Vyhledávání lokality">
 
                 <template #item="{ props, item }">
                     <v-list-item v-bind="props" :title="(props.userData as any).suggestFirstRow"
@@ -21,26 +20,24 @@
                 <span>km</span>
             </div>
         </div>
-        {{ selectedLocality }}
-
     </div>
 </template>
 
 <script setup lang="ts">
 import _ from "lodash";
 import axios from "@/plugins/axios";
-import { ref, watch } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { GeoObject } from "@/class/GeoObject";
-import { ExactLocationFilter, RadiusLocationFilter } from "@/class/GeoFilter";
+import { ExactLocationFilter, LocationFilter, RadiusLocationFilter } from "@/class/LocationFilter";
 
 const props = defineProps({
     modelValue: {
-        type: Object,
+        type: Object as () => LocationFilter,
     },
     exact: {
         type: Boolean,
         default: false,
-    },
+    }
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -50,7 +47,7 @@ const suggestions = ref({
     data: [] as any,
 })
 
-const searchString = ref(props.modelValue?.userData?.suggestFirstRow ?? "");
+const searchString = ref(props.modelValue?.place?.userData.suggestFirstRow ?? "");
 const noSearch = ref(true);
 
 function update(e: any) {
@@ -58,20 +55,37 @@ function update(e: any) {
     suggestDebounced(e.target.value);
 }
 
-const selectedLocality = ref(props.modelValue?.userData.suggestFirstRow as any);
+const selectedLocality = ref(props.modelValue?.place as any);
 const radius = ref(1);
 const loading = ref(false);
 
-function emitUpdate() {
-    if (!selectedLocality.value)  emit("update:modelValue", null);
-    else if (props.exact) emit("update:modelValue", new ExactLocationFilter(selectedLocality.value));
-    else emit("update:modelValue",  new RadiusLocationFilter(selectedLocality.value, radius.value));
+const filterObject = computed(() => {
+    if (!selectedLocality.value) return null;
+    if (props.exact) return new ExactLocationFilter(selectedLocality.value);
+    else return new RadiusLocationFilter(selectedLocality.value, radius.value);
+});
 
+const data = computed(() => {
+    // @ts-ignore
+    const x = suggestions.value.data.filter(obj => {
+        if (!obj) return false;
+        if (props.exact) return ExactLocationFilter.supportsCategory(obj.category);
+        else {
+            return true;
+        }
+    });
+    return x;
+})
+
+
+function emitUpdate() {
+    emit("update:modelValue", filterObject.value);
 }
 
 watch(radius, () => {
     if (selectedLocality.value) emitUpdate();
 });
+
 
 function suggest(s: string) {
     if (s.length < 2) {
@@ -95,14 +109,36 @@ function suggest(s: string) {
             suggestions.value = response.data;
             noSearch.value = false;
             loading.value = false;
+
         });
 }
 
 const suggestDebounced = _.debounce(suggest, 500);
 watch(selectedLocality, (item: GeoObject) => {
-    console.debug("selectedLocality", item);
     emitUpdate();
 });
+
+watch(() => props.exact, (exact) => {
+    if (!selectedLocality.value) return;
+    if (exact && selectedLocality.value.category === undefined) {
+        selectedLocality.value = null;
+    }
+    if (!exact && selectedLocality.value.userData.longitude === undefined) {
+        selectedLocality.value = null;
+    }
+    emitUpdate();
+})
+
+watch(() => props.modelValue, (value) => {
+    if (value && value.type === "radius") {
+        selectedLocality.value = value.place;
+        radius.value = value.radius;
+    } else if (value && value.type === "exact") {
+        selectedLocality.value = value.place;
+    } else {
+        selectedLocality.value = null;
+    }
+})
 
 </script>
 

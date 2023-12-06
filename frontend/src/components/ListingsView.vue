@@ -2,8 +2,8 @@
     <div class="container">
         <h1 v-if="showCityFilter">Inzeráty podle měst</h1>
         <h1 v-else>Prohlížeč inzerátů</h1>
-        <city-filter v-if="showCityFilter" @update="updateCities" class="mt-2 mb-6" :filter="filter"></city-filter>
-        <listings-filter @update="updateFilter"  class="mt-2 mb-2"></listings-filter>
+        <city-filter v-if="showCityFilter" @update="updateCities" class="mt-2 mb-2" :filter="filter"></city-filter>
+        <listings-filter @update="updateFilter" class="mt-2 mb-2"></listings-filter>
         <div class="listings mt-4">
             <div class="listings" :class="{ 'blur-deleted': blurDeleted }">
                 <h2 id="listings">{{ listingsCount }} inzerátů</h2>
@@ -13,7 +13,7 @@
                 <loader v-show="loading">Načítání inzerátů...</loader>
                 <listing v-for="listing in listings" :data="listing" :key="listing['_id']"></listing>
                 <v-pagination v-show="pages > 1" v-model="page" :length="pages" density="compact" variant="outlined"
-                    class="text-primary text-small"/>
+                    class="text-primary text-small" />
 
             </div>
 
@@ -51,14 +51,14 @@ defineProps({
 const listingsCount = ref(0);
 const listings = ref([] as Array<ListingObject>);
 const perPage = ref(parseInt(route.query.perPage as string) || 20);
-const pages = computed(() => Math.min( Math.ceil(listingsCount.value / perPage.value), 999));
+const pages = computed(() => Math.min(Math.ceil(listingsCount.value / perPage.value), 999));
 const page = ref(parseInt(route.query.p as string) || 1);
 
 watch(page, () => {
     router.push({ query: { p: page.value } });
 });
 watch(page, () => {
-    if(page.value !== 1) location.hash = "#listings";
+    if (page.value !== 1) location.hash = "#listings";
     getListingsDebouced();
 });
 
@@ -114,11 +114,11 @@ function getListings(id?: string) {
         params = { ...params, ...filter.value.toParams() };
     }
 
+
     if (cityFilter.value.length > 0) {
         params.cities = cityFilter.value
             .filter((a) => a.selected)
-            .map((a) => a.postcode + "-" + a.name )
-            .join(",");
+            .map((a) => a.postcode + "-" + a.name)
     }
 
     if (id) params = { id };
@@ -141,7 +141,6 @@ function getListings(id?: string) {
 
 
 <style lang="scss">
-
 .listings {
     display: flex;
     flex-direction: column;
