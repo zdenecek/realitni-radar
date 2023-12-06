@@ -1,0 +1,5 @@
+db.houses.createIndex( { location : "2dsphere" } )
+db.houses.createIndex( { inserted : 1 } )
+db.houses.createIndex( { id : 1 } )
+db.houses.createIndex( { title : "text",description : "text" ,  meta : "text"}, { default_language: "none" } )
+db.houses.createIndex( { deleted : 1 } )

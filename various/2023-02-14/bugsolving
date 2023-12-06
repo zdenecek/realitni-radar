@@ -1,0 +1,21 @@
+
+
+db.houses.aggregate([
+    {
+        "$addFields": {
+            "count": {
+                "$size": {
+                    "$objectToArray": "priceHistory"
+                }
+            }
+        }
+    },
+    { "$match": { "count": { "$gte": 2 } } },
+    { "$project": { "id": 1, "_id": 1, "priceHistory": 1 } },
+    { "$out": "results" }
+]
+)
+
+mongoexport -d sreality -c results -f _id,id,priceHistory --type=csv > results.csv
+
+db.results.drop();

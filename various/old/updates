@@ -1,0 +1,33 @@
+
+db.houses.updateMany({ locality: {$type: 'string'} },  [  { $set: { address: "$locality" } } ,  { $unset: "locality" } ])
+db.houses.updateMany({ priceDropCzk: {$exists: false} },  [  { $set: { priceDropPercent: 0 , priceDropCzk: 0 }  } ])
+
+db.houses.aggregate([
+{
+    $addFields: 
+    {
+        historyCount:  
+        { 
+            "$size": 
+            { 
+                "$objectToArray": "$priceHistory"
+            }
+        }
+    } 
+},
+{
+    $match: {
+        historyCount: {$gte: 2}
+    }
+}
+]).forEach( a => {
+
+    let keys = Object.keys(a.priceHistory).sort();
+    if(a.priceHistory[keys[0]] != a.priceHistory[keys[1]]) return;
+    for(let i = 0; i < keys.length-1 ; i ++) {
+        a.priceHistory[keys[i]] = a.priceHistory[keys[i+1]];
+    }
+    a.priceHistory[keys[keys.length - 1]] = a.price;
+    
+    db.houses.updateOne({id: a.id}, [ {$set: { priceHistory: a.priceHistory}}])
+})
