@@ -1,5 +1,5 @@
 {
-  "name": "srm-api",
+  "name": "realitni-radar-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
@@ -25,9 +24,8 @@
     "nodemon": "^3.0.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "winston": "^3.8.2"
+    "axios": "^1.6.2"
   },
   "devDependencies": {
-    "axios": "^1.6.2"
   }
 }
