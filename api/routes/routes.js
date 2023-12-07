@@ -1,21 +1,10 @@
 const express = require("express");
-const createClient = require("../src/database");
+const client = require("../src/database");
 const axios = require("../src/axios");
-const logger = require("../src/log");
 const listings = require("../src/listings");
 const router = express.Router();
 
 module.exports = router;
-const dbName = process.env.DB_NAME;
-
-let client = createClient();
-let collection = client.db(dbName).collection("houses");
-
-client.on("close", () => {
-    client = createClient();
-    collection = client.db(dbName).collection("houses");
-});
-
 
 //Get all Method
 router.post("/getAll", async (req, res) => {
@@ -67,9 +56,9 @@ router.post("/getAll", async (req, res) => {
             },
         });
     }
-    logger.info(aggregationChain);
+    console.debug(aggregationChain);
 
-    const aggregationResult = await collection.aggregate(aggregationChain).next();
+    const aggregationResult = await client.collection('houses').aggregate(aggregationChain).next();
 
     const result = {
         listings: aggregationResult.listings,
@@ -88,7 +77,7 @@ router.get("/listing/:listingId", async (req, res) => {
         id: req.params.listingId
     };
 
-    const result = await collection.findOne(query);
+    const result = await client.collection('houses').findOne(query);
 
 
     res.json(result);
@@ -118,7 +107,7 @@ router.get("/municipalities", async (req, res) => { // TODO: REMOVE
         else aggregationChain.push({ $match: ranges[0] });
     }
 
-    const result = await (await collection.aggregate(aggregationChain)).toArray();
+    const result = await (await client.collection('houses').aggregate(aggregationChain)).toArray();
 
     res.json(result);
 });
@@ -155,7 +144,7 @@ router.get("/cities", async (req, res) => {
         else aggregationChain.push({ $match: ranges[0] });
     }
 
-    const result = await (await collection.aggregate(aggregationChain)).toArray();
+    const result = await (await client.collection('houses').aggregate(aggregationChain)).toArray();
 
     res.json(result);
 });
@@ -181,7 +170,7 @@ router.get("/suggest", (req, res) => {
             }
             else {
 
-                logger.error("suggest request error", error);
+                console.error("suggest request error", error);
             }
         });
 });
