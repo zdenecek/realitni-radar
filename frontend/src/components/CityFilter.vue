@@ -5,13 +5,13 @@
             <v-tooltip
                 text="Při odemčení bude výčet měst ovlivňován dalšími změnami filtru. V počtech inzerátů pro město budou zahrnuty pouze inzeráty odpovídající filtru">
                 <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" @click="toggleLock" variant="outlined"
+                    <v-btn v-bind="props" @click="toggleLock" variant="outlined" size="small"
                         :prepend-icon="locked ? 'mdi-lock-outline' : 'mdi-lock-off-outline'"
                         :text="locked ? 'Odemknout' : 'Zamknout'">
                     </v-btn>
                 </template>
             </v-tooltip>
-            <v-btn @click="visible = !visible" :text="visible ? 'Skrýt' : 'Zobrazit'" 
+            <v-btn @click="visible = !visible" :text="visible ? 'Skrýt' : 'Zobrazit'" size="small"
                 :prepend-icon="visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" variant="outlined"></v-btn>
         </div>
 

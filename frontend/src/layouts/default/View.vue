@@ -12,9 +12,16 @@
   padding-bottom: 2em;
   padding-right: 4em;
 
-  margin-left: 1em;
+  min-height: 100%;
+
+  display: flex;
+  flex-direction: column;
 }
 
+
+ .v-main  {
+  padding-left: 160px !important;
+}
 
 
 h1, h2 {

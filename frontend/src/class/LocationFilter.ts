@@ -86,8 +86,6 @@ export class ExactLocationFilter {
                 [ExactLocationFilter.getGeoObjectPropName(params.loc_type)]: params.loc_name,
             }
         } as GeoObject) // shouldnt break anything
-
-        console.log(x);
         return x;
     }
 }

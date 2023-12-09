@@ -10,26 +10,37 @@ const user = {
 }
 
 function findUser(username, callback) {
-    User.findOne({ username }, callback)
+    User.findOne({$or: [
+        { username },
+        { email: username },
+    ]}, callback)
 }
 
 
-async function registerUser(username, password, name, role, callback) {
+async function registerUser(email, password, name, callback) {
 
-    // Check if the user already exists
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
+    // Check if the user already exists and has a password
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser.passwordHash !== null) {
         return callback('User already exists');
     }
 
     // Hash the password
-    const passwordHash = await bcrypt.hash(password, 10);
 
     // Create a new user instance and save it to the database
-    const newUser = new User({ username, passwordHash, role, name });
-    await newUser.save();
+    if (existingUser) {
+        await existingUser.setPassword(password);
+        existingUser.name = name;
+        await existingUser.save();
+        return callback(null, existingUser);
+    }
+    else {
+        const newUser = new User({ username: email, email: email, role: 'registered', name });
+        await newUser.setPassword(password);
+        await newUser.save();
+        callback(null, newUser);
+    }
 
-    callback(null, newUser);
 }
 
 passport.use(new LocalStrategy(
@@ -42,13 +53,15 @@ passport.use(new LocalStrategy(
 
             // User not found
             if (!user) {
-                return done( {
+                return done({
+                    status: 404,
                     message: 'User not found',
                     code: 'user-not-found'
                 })
             }
             if (! await user.isValidPassword(password)) {
                 return done({
+                    status: 401,
                     message: 'Invalid password',
                     code: 'invalid-password'
                 })
@@ -74,19 +87,13 @@ function authorize(requiredRole = 'admin') {
 }
 
 
-passport.serializeUser(function (user, cb) {
-    process.nextTick(function () {
-        return cb(null, {
-            id: user.id,
-            username: user.username
-        });
-    });
+passport.serializeUser((user, done) => {
+    done(null, user.id);
 });
 
-
-passport.deserializeUser(function (user, cb) {
-    process.nextTick(function () {
-        return cb(null, user);
+passport.deserializeUser((id, done) => {
+    User.findById(id, (err, user) => {
+        done(err, user);
     });
 });
 

@@ -16,7 +16,7 @@ class EstatesSpider(ListingsCounterSpider):
             'sreality_scraper.pipelines.SaveToDbPipeline': 300,
         },
         'LOG_LEVEL': 'INFO',
-        'LOG_FILE': os.path.join(os.getenv("LOG_DIR"), f"listings.log"),
+        'LOG_FILE': os.path.join(os.getenv("LOG_DIR"), f"listings-spider.log"),
     }
 
     include = {

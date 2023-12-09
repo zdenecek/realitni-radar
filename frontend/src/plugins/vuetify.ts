@@ -28,17 +28,29 @@ export default createVuetify({
       variant: 'outlined',
       density: 'comfortable',
     },
-    VIcon: {
-      color: 'secondary'
-    },
+  
     VInput: {
       density: 'compact',
       hideDetails: "auto",
     },
     VBtn: {
       variant: 'outlined',
-      size: 'small',
+      VIcon: {
+        color: 'secondary'
+      },
     },  
+    VCard: {
+      VTextField: {
+        variant: 'outlined',
+        hideSpinButtons: true,
+        hideDetails: false,
+      },
+    },
+    VListItem: {
+      VIcon: {
+        color: 'secondary'
+      },
+    }
   },
   theme: {
     themes: {

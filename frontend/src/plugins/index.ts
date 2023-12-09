@@ -9,6 +9,7 @@ import vuetify from './vuetify'
 import router from '../router'
 import initCharts from './chartjs'
 import unhead from './unhead'
+import pinia from './pinia'
 import './utils'
 
 // Types
@@ -18,7 +19,8 @@ export function registerPlugins (app: App) {
   app
     .use(vuetify)
     .use(router)
-    .use(unhead);
+    .use(unhead)
+    .use(pinia);
 
   initCharts();  
 

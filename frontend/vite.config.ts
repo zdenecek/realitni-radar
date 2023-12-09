@@ -45,7 +45,7 @@ export default ({ mode}) => {
     port: 5173,
     cors: true,
     proxy: {
-      '/api':  'http://sreality.zdenektomis.eu/',
+      '/api':  'http://localhost:3001/',
     }
   },
 })};

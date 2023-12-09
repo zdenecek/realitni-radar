@@ -6,6 +6,9 @@
                 {{ data?.title ?? "Inzerát" }}, {{ address }}
             </div>
             <v-chip-group class="top-labels">
+                <v-chip v-if="data?.isFavorite"  append-icon="mdi-heart-outline"   class="top-label top-label-favorite text-secondary">
+                    Oblíbený
+                </v-chip>
                 <v-chip v-if="data?.prop" :class="'top-label top-label-prop top-label-prop-' + data.prop" variant="flat">
                     {{ propLabel }}
                 </v-chip>
@@ -65,13 +68,17 @@
                 <span>{{ priceDrop }}</span>
             </div>
         </div>
-        <div class="actions">
-            <v-btn class="button" @click="toggleDetails">Zobrazit detaily</v-btn>
-            <v-btn class="button" :href="webUrl" target="_blank">Otevřít na sreality</v-btn>
-            <v-btn class="button" :href="detailUrl" target="_blank">Detail inzerátu</v-btn>
-            <v-btn class="button" :href="data?.apiUrl" target="_blank">Api</v-btn>
+        <div class="actions text-small"  >
+            <v-btn class="button" @click="toggleDetails" prepend-icon="mdi-eye-outline">Zobrazit podrobnosti</v-btn>
+            <v-btn class="button" :href="webUrl" target="_blank">Otevřít na Sreality</v-btn>
+            <v-btn class="button" @click="togglefavorites"
+                :prepend-icon="data?.isFavorite ? 'mdi-heart' : 'mdi-heart-outline'">
+                {{ data?.isFavorite ? 'Odebrat z oblíbených' : 'Přidat do oblíbených' }}</v-btn>
+            <v-btn class="button" :href="detailUrl" target="_blank">Otevřít na nové stránce</v-btn>
+
+            <v-btn class="button" :href="data?.apiUrl" target="_blank" v-show="false">Api</v-btn>
         </div>
-        <div class="details" v-show="showDetails">
+        <div class="details" v-show="expand">
             <div class="description">
                 <span v-html="description"></span>
             </div>
@@ -92,118 +99,117 @@
     </v-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { Ownership, OwnershipLabels, OwnershipType, PropertyType } from "@/class/types";
-import { defineComponent, PropType } from "vue";
 import PriceChart from "./PriceChart.vue";
 import Checkmark from "./partial/Checkmark.vue";
 import { PropertyLabels, PropertyCodes, DealLabels, SubcategoryLabels } from "@/class/types";
+import { computed, ref } from "vue";
+import axios from "@/plugins/axios";
+import { toast } from "@/plugins/toastify";
 
-export default defineComponent({
-    name: "Listing",
-    components: {
-        PriceChart,
-        Checkmark,
+const props = defineProps({
+    data: Object,
+    autoexpand: Boolean
+})
 
-    },
-    props: {
-        data: Object,
-        autoexpand: Boolean as PropType<boolean>,
-    },
-    created() {
-        if (this.autoexpand) this.showDetails = true;
-    },
-    data() {
-        return {
-            showDetails: false,
-            PropertyLabels, PropertyCodes, DealLabels, SubcategoryLabels
-        };
-    },
-    computed: {
-        chartData() {
-            return {
-                priceHistory: this.data?.priceHistory,
-                deleted: this.data?.deleted,
-            }
-        },
-        priceDropLabel() {
-            if (this.data?.priceDropPercent >= 0.5) return 50;
-            if (this.data?.priceDropPercent >= 0.4) return 40;
-            if (this.data?.priceDropPercent >= 0.3) return 30;
-            if (this.data?.priceDropPercent >= 0.25) return 25;
-            if (this.data?.priceDropPercent >= 0.2) return 20;
-            if (this.data?.priceDropPercent >= 0.15) return 15;
-            if (this.data?.priceDropPercent >= 0.10) return 10;
-            if (this.data?.priceDropPercent >= 0.075) return 7;
-            if (this.data?.priceDropPercent >= 0.03) return 3;
-            return false;
-        },
-        propLabel() {
-            return PropertyLabels[this.data?.prop as PropertyType];
-        },
-        ownershipLabel() {
-            return OwnershipLabels[this.data?.ownership as OwnershipType];
-        },
-        dealLabel() {
-            return DealLabels[this.data?.deal as PropertyType];
-        },
-        subLabel() {
-            return SubcategoryLabels[this.data?.prop][this.data?.sub];
-        },
-        webUrl() {
-            return 'https://' + this.data?.url;
-        },
-        detailUrl() {
-            return "/listing/" + this.data?.id;
-        },
-        ageString() {
-            const to = this.data?.deleted ? Date.parse(this.data?.deleted) : Date.now();
-            const from = Date.parse(this.data?.inserted);
-            const age = Math.ceil((to - from) / (1000 * 60 * 60 * 24));
-            let s = age + (age === 1 ? " den" : " dní");
+const showDetails = ref(false);
+const expand = computed(() => props.autoexpand || showDetails.value);
 
-            if (this.data?.deleted) {
-                const to2 = Date.now();
-                const age2 = Math.ceil((to2 - from) / (1000 * 60 * 60 * 24));
-                s += ` (${age2} ${age2 === 1 ? " den" : " dní"} od vložení)`;
-            }
-            return s;
-        },
-        description() {
-            return this.data?.description ?? '-';
-        },
-        price() {
-            let s = this.data?.price?.toLocaleString() + " Kč" ?? "-";
-            if (this.data?.priceUnit) s += " " + this.data?.priceUnit;
-            if (this.data?.pricePerMeter) s += ` (${Math.floor(this.data?.pricePerMeter).toLocaleString()} Kč/m²)`;
+const chartData = computed(() => ({
+    priceHistory: props.data?.priceHistory,
+    deleted: props.data?.deleted
+}));
 
-            return this.data?.price ? s : "-";
-        },
-        priceHistory() {
-            return this.data?.priceHistory;
-        },
-        ownership() {
-            return Ownership[this.data?.ownership] ?? false;
-        },
-        priceDrop() {
-            return this.data?.priceDropPercent > 0 ? `${Math.round(this.data?.priceDropPercent * 100)} %` : false;
-        },
-        address() {
-            return this.data?.address ?? this.data?.locality?.name ?? "";
-        },
-        deleted() {
-            return this.data?.deleted;
-        },
-    },
-    methods: {
-        toggleDetails() {
-            this.showDetails = !this.showDetails;
-        },
-        dateStr(date: string): string {
-            return new Date(Date.parse(date)).toLocaleDateString();
-        }
-    }
+const priceDropLabel = computed(() => {
+    if (props.data?.priceDropPercent >= 0.5) return 50;
+    if (props.data?.priceDropPercent >= 0.4) return 40;
+    if (props.data?.priceDropPercent >= 0.3) return 30;
+    if (props.data?.priceDropPercent >= 0.25) return 25;
+    if (props.data?.priceDropPercent >= 0.2) return 20;
+    if (props.data?.priceDropPercent >= 0.15) return 15;
+    if (props.data?.priceDropPercent >= 0.10) return 10;
+    if (props.data?.priceDropPercent >= 0.075) return 7;
+    if (props.data?.priceDropPercent >= 0.03) return 3;
+    return false;
 });
+
+const propLabel = computed(() => PropertyLabels[props.data?.prop as PropertyType]);
+const ownershipLabel = computed(() => OwnershipLabels[props.data?.ownership as OwnershipType]);
+const dealLabel = computed(() => DealLabels[props.data?.deal as PropertyType]);
+const subLabel = computed(() => SubcategoryLabels[props.data?.prop][props.data?.sub]);
+const webUrl = computed(() => 'https://' + props.data?.url);
+const detailUrl = computed(() => "/listing/" + props.data?.id);
+
+const ageString = computed(() => {
+    const to = props.data?.deleted ? Date.parse(props.data?.deleted) : Date.now();
+    const from = Date.parse(props.data?.inserted);
+    const age = Math.ceil((to - from) / (1000 * 60 * 60 * 24));
+    let s = age + (age === 1 ? " den" : " dní");
+
+    if (props.data?.deleted) {
+        const to2 = Date.now();
+        const age2 = Math.ceil((to2 - from) / (1000 * 60 * 60 * 24));
+        s += ` (${age2} ${age2 === 1 ? " den" : " dní"} od vložení)`;
+    }
+    return s;
+});
+
+const description = computed(() => props.data?.description ?? '-');
+const price = computed(() => {
+    let s = props.data?.price?.toLocaleString() + " Kč" ?? "-";
+    if (props.data?.priceUnit) s += " " + props.data?.priceUnit;
+    if (props.data?.pricePerMeter) s += ` (${Math.floor(props.data?.pricePerMeter).toLocaleString()} Kč/m²)`;
+
+    return props.data?.price ? s : "-";
+});
+const priceHistory = computed(() => props.data?.priceHistory);
+const ownership = computed(() => Ownership[props.data?.ownership] ?? false);
+const priceDrop = computed(() => props.data?.priceDropPercent > 0 ? `${Math.round(props.data?.priceDropPercent * 100)} %` : false);
+const address = computed(() => props.data?.address ?? props.data?.locality?.name ?? "");
+const deleted = computed(() => props.data?.deleted);
+
+function toggleDetails() {
+    if (props.data)
+        showDetails.value ^= 1;
+}
+
+function dateStr(date: string) {
+    return new Date(Date.parse(date)).toLocaleDateString();
+}
+
+const emit = defineEmits(['toggle-favorites']);
+
+function togglefavorites() {
+    if (!props.data) return;
+    emit('toggle-favorites', props.data.id);
+
+    if (!props.data.isFavorite) {
+
+        axios.post('/favorites/add', {
+            id: props.data._id,
+        }).then(() => {
+            if (!props.data) return;
+            props.data.isFavorite ^= 1;
+
+        }).catch((e) => {
+            if (!props.data) return;
+            toast('Nepodařilo se přidat inzerát do oblíbených');
+            console.error(e);
+        });
+
+    } else {
+        axios.delete(`/favorites/delete/${props.data._id}`).then(() => {
+            if (!props.data) return;
+            props.data.isFavorite ^= 1;
+        }).catch((e) => {
+            if (!props.data) return;
+            toast('Nepodařilo se odebrat inzerát z oblíbených');
+            console.error(e);
+        });
+    }
+}
+
 </script>
 
 <style lang="scss">

@@ -1,7 +1,5 @@
 <template>
-    <div class="container">
-        <h1 v-if="showCityFilter">Inzeráty podle měst</h1>
-        <h1 v-else>Prohlížeč inzerátů</h1>
+    <div>
         <city-filter v-if="showCityFilter" @update="updateCities" class="mt-2 mb-2" :filter="filter"></city-filter>
         <listings-filter @update="updateFilter" class="mt-2 mb-2"></listings-filter>
         <div class="listings mt-4">
@@ -11,7 +9,11 @@
                     class="text-primary text-small">
                 </v-pagination>
                 <loader v-show="loading">Načítání inzerátů...</loader>
-                <listing v-for="listing in listings" :data="listing" :key="listing['_id']"></listing>
+
+                <v-skeleton-loader v-for="n in 20" :key="n" v-if="loading"
+                    type="image, article"></v-skeleton-loader>
+                <listing v-if="!nextPageUsed" v-for="listing in responseData.listings" :data="listing" :key="listing['_id']" :autoexpand="expand"></listing>
+                <listing v-else v-for="listing in responseData.nextPage" :data="listing" :key="listing['_id']" :autoexpand="expand"></listing>
                 <v-pagination v-show="pages > 1" v-model="page" :length="pages" density="compact" variant="outlined"
                     class="text-primary text-small" />
 
@@ -40,26 +42,43 @@ import _ from "lodash";
 const route = useRoute();
 const router = useRouter();
 
-defineProps({
+const props = defineProps({
     showCityFilter: {
         type: Boolean,
         default: true,
     },
+    url: {
+        type: String,
+        default: "listings",
+    },
 });
 
 // LISTINGS
-const listingsCount = ref(0);
-const listings = ref([] as Array<ListingObject>);
+const listingsCount = computed(() => responseData.value.count);
+const responseData = ref({
+    count: 0,
+    listings: [] as Array<ListingObject>,
+    nextPage: [] as Array<ListingObject>
+});
 const perPage = ref(parseInt(route.query.perPage as string) || 20);
 const pages = computed(() => Math.min(Math.ceil(listingsCount.value / perPage.value), 999));
 const page = ref(parseInt(route.query.p as string) || 1);
 
+
+// NEXT PAGE trick - preload one page in advance
+const nextPageUsed = ref(false);
+
 watch(page, () => {
     router.push({ query: { p: page.value } });
 });
-watch(page, () => {
+watch(page, (newVal: number, oldVal: number) => {
     if (page.value !== 1) location.hash = "#listings";
-    getListingsDebouced();
+    if (!nextPageUsed.value && newVal === oldVal+1) {
+        nextPageUsed.value = true;
+    } else {
+        loading.value = true;
+    }
+    getListings();
 });
 
 // STATE
@@ -74,6 +93,7 @@ const cityFilter = ref([] as Array<CityObject>);
 const blurDeleted = computed(() => filter.value?.deleted !== "deleted")
 
 
+
 // FETCHING LISTINGS
 const _debounced = _.debounce(getListings, 1000);
 const getListingsDebouced = () => {
@@ -83,10 +103,10 @@ const getListingsDebouced = () => {
 
 
 onMounted(() => {
+    loading.value = true;
     filter.value = FilterObject.fromParams(route.query);
     // for compatibility with old links with id: /?id=123
     if (route.query.id) getListings(route.query.id as string);
-    else getListings();
 });
 
 function updateFilter(new_filter: FilterObject) {
@@ -103,8 +123,7 @@ function updateCities(new_cities: Array<CityObject>) {
 }
 
 function getListings(id?: string) {
-    console.debug("fetching listings");
-    loading.value = true;
+    console.debug("Fetching listings...");
     let params = {
         p: page.value,
         perPage: perPage.value,
@@ -113,8 +132,6 @@ function getListings(id?: string) {
     if (filter.value) {
         params = { ...params, ...filter.value.toParams() };
     }
-
-
     if (cityFilter.value.length > 0) {
         params.cities = cityFilter.value
             .filter((a) => a.selected)
@@ -124,16 +141,16 @@ function getListings(id?: string) {
     if (id) params = { id };
 
     axios
-        .post("getAll", {
+        .post(props.url, {
             ...params,
         })
         .then((response) => {
-            listingsCount.value = response.data.count;
-            listings.value = response.data.listings;
+            nextPageUsed.value = false;
+            responseData.value = response.data;
             loading.value = false;
         })
         .catch((error) => {
-            console.error(error);
+            console.error("Listings error: " + error.message);
         });
 }
 

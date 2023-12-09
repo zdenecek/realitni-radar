@@ -8,7 +8,7 @@
                 :prepend-icon="visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" variant="outlined"></v-btn>
         </div>
         <div class="animation-wrapper">
-            <transition name="expand">
+            <Transition name="expand">
                 <form @submit.prevent="update" v-show="!collapseAll && visible">
                     <div class="search mb-2 mt-2">
                         <div class="label flex-wrap">
@@ -153,7 +153,7 @@
                     </div>
 
                 </form>
-            </transition>
+            </Transition>
         </div>
 
     </div>
