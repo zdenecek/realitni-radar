@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <v-form ref="form" v-model="valid" @submit.prevent="submit">
+        <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="blur">
 
         <v-card class="auth-card">
             <h2>Registrace</h2>
@@ -17,7 +17,7 @@
 
             <v-card-actions class="actions">
                 <v-spacer></v-spacer>
-                <v-btn variant="outlined" type="submit" color="primary"  :disabled="!valid">Registrovat</v-btn>
+                <v-btn variant="text" type="submit" color="primary"  :disabled="!valid">Registrovat</v-btn>
             </v-card-actions>
         </v-card>
     </v-form>
@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import _ from 'lodash';
-import { Ref, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import {toast} from "@/plugins/toastify";
 
@@ -43,20 +43,20 @@ const valid = ref(false);
 const form = ref(null as HTMLFormElement | null);
 
 const usernameRules = [
-    v => !!v || 'Vyplňte email nebo uživatelské jméno',
-    v => /.+@.+\..+/.test(v) || 'Musí být platný email',
+    (v: string) => !!v || 'Vyplňte email nebo uživatelské jméno',
+    (v: string) => /.+@.+\..+/.test(v) || 'Musí být platný email',
 ];
 const nameRules = [
-    v => v.length >= 5 || 'Zadejte celé jméno',
-    v => !/\d/.test(v) || 'Zadejte celé jméno',
+    (v: string) => v.length >= 5 || 'Zadejte celé jméno',
+    (v: string) => !/\d/.test(v) || 'Zadejte celé jméno',
 ];
 
 const passwordRules = [
-    v => !!v || 'Vyplňte heslo',
+    (v: string) => !!v || 'Vyplňte heslo',
 ];
 const password2Rules = [
-    v => !!v || 'Vyplňte heslo znovu',
-    v => v === password.value || 'Hesla se neshodují',
+    (v: string) => !!v || 'Vyplňte heslo znovu',
+    (v: string) => v === password.value || 'Hesla se neshodují',
 ];
 
 

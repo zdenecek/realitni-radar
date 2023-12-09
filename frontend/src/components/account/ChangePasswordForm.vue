@@ -1,6 +1,6 @@
 <template>
     <v-card>
-        <v-form @submit.prevent="submit" v-model="valid" class="flex flex-col" ref="form">
+        <v-form @submit.prevent="submit" v-model="valid" class="flex flex-col" ref="form" validate-on="blur">
             <h2>Změna hesla</h2>
             <v-text-field label="Staré heslo" type="password" v-model="oldPassword" :rules="oldPasswordRules"
                 :error-messages="errorMessages.oldPassword" @input="errorMessages.oldPassword = ''" required></v-text-field>
@@ -12,7 +12,7 @@
 
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn type="submit" :disabled="!valid" variant="outlined" class="text-primary">Změnit heslo</v-btn>
+                <v-btn type="submit" :disabled="!valid" variant="text" class="text-primary">Změnit heslo</v-btn>
             </v-card-actions>
         </v-form>
     </v-card>
@@ -38,16 +38,16 @@ const valid = ref(false);
 const form = ref(null as HTMLFormElement | null);
 
 const oldPasswordRules = [
-    v => !!v || 'Vyplňte staré heslo',
+    (v: string) => !!v || 'Vyplňte staré heslo',
 ];
 
 const newPasswordRules = [
-    v => !!v || 'Vyplňte nové heslo',
+    (v: string) => !!v || 'Vyplňte nové heslo',
 ];
 
 const newPassword2Rules = [
-    v => !!v || 'Vyplňte nové heslo znovu',
-    v => v === newPassword.value || 'Hesla se neshodují',
+    (v: string) => !!v || 'Vyplňte nové heslo znovu',
+    (v: string) => v === newPassword.value || 'Hesla se neshodují',
 ];
 
 const errorMessages = ref({} as any);

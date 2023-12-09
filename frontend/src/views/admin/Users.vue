@@ -10,8 +10,8 @@
 
 
             <template v-slot:item.role="{ item }">
-                <v-icon>{{ roleIcons[item.role] }}</v-icon>
-                {{ roleTitles[item.role] }}
+                <v-icon>{{ roleIcon(item.role) }}</v-icon>
+                {{ roleTitle(item.role) }}
             </template>
             <template v-slot:item.actions="{ item }">
                 <v-icon class="me-2 text-secondary" @click="editItem(item)">
@@ -45,7 +45,7 @@
                                 v-show="false"></v-text-field>
                             <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
                             <v-select v-model="editedItem.role" :items="roles" label="Role" variant="outlined"
-                                density="compact" :item-title="item => roleTitles[item]" :item-value="item => item">
+                                density="compact" :item-title="item => roleTitle(item)" :item-value="item => item">
                             </v-select>
                         </v-card-text>
 
@@ -80,9 +80,9 @@
         </v-data-table>
         <v-snackbar v-model="hasError">
             {{ error }}
-            <template v-slot:action="{ attrs }">
-                <v-btn text v-bind="attrs" @click="error = ''">Close</v-btn>
-            </template>
+            <template v-slot:actions>
+                <v-btn variant="text"  @click="error = ''">Close</v-btn>
+            </template> 
         </v-snackbar>
     </div>
 </template>
@@ -124,12 +124,18 @@ const roleTitles = {
     user: 'Uživatel',
     registered: 'Nový uživatel',
 }
+function roleTitle(role: string) {
+    return roleTitles[role  as keyof typeof roleTitles];
+}
 const roles = Object.keys(roleTitles).filter(role => role !== 'admin');
 
 const roleIcons = {
     admin: 'mdi-account-cog-outline',
     user: 'mdi-account-outline',
     registered: 'mdi-account-question-outline',
+}
+function roleIcon(role: string) {
+    return roleIcons[role as keyof typeof roleIcons];
 }
 
 

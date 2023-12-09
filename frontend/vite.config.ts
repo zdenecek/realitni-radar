@@ -31,9 +31,6 @@ export default ({ mode}) => {
       },
     }),
   ],
-  build: {
-    outDir: process.env.OUT_PATH
-  },
   define: { 'process.env': {} },
   resolve: {
     alias: {

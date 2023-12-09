@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <v-form ref="form" v-model="valid" @submit.prevent="submit">
+        <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="blur">
 
             <v-card class="auth-card">
                 <h2>Přihlášení</h2>
@@ -15,10 +15,10 @@
 
 
                 <v-card-actions class="actions">
-                    <v-btn variant="outlined" :to="{ name: 'register' }">Registrace</v-btn>
+                    <v-btn variant="text" :to="{ name: 'register' }">Registrace</v-btn>
 
                     <v-spacer></v-spacer>
-                    <v-btn variant="outlined" type="submit" color="primary" :disabled="!valid">Přihlásit</v-btn>
+                    <v-btn variant="text" type="submit" color="primary" :disabled="!valid">Přihlásit</v-btn>
 
                 </v-card-actions>
             </v-card>
@@ -46,11 +46,11 @@ const form = ref(null as HTMLFormElement | null);
 
 
 const usernameRules = [
-    v => !!v || 'Vyplňte email nebo uživatelské jméno',
+    (v: string) => !!v || 'Vyplňte email nebo uživatelské jméno',
 ];
 
 const passwordRules = [
-    v => !!v || 'Vyplňte heslo',
+    (v: string) => !!v || 'Vyplňte heslo',
 ];
 
 const errorMessages = ref({} as any);

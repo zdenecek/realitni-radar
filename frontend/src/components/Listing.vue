@@ -170,8 +170,7 @@ const address = computed(() => props.data?.address ?? props.data?.locality?.name
 const deleted = computed(() => props.data?.deleted);
 
 function toggleDetails() {
-    if (props.data)
-        showDetails.value ^= 1;
+    showDetails.value = ! showDetails.value;
 }
 
 function dateStr(date: string) {
