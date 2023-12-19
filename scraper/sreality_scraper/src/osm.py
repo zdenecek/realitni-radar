@@ -3,6 +3,10 @@
 def get_reverse_geocode_url(lon, lat):
     return f"https://geocode.maps.co/reverse?lat={lat}&lon={lon}&accept-language=cs"
 
+
+def get_reverse_geocode_nominatim_url(lon, lat):
+    return f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&accept-language=cs&format=json"
+
 def normalize_address(address):
 
     if "postcode" in address:

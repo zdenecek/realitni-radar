@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 # import certifi
 from scrapy import Request
 from pymongo import MongoClient, InsertOne,  ReplaceOne
-from sreality_scraper.src.smapy import get_reverse_geocode_url, parse_reverse_geocode_xml
 from sreality_scraper.src.utils import parse_int, get_area_from_listing
 from sreality_scraper.src.sreality import property_codes
 
@@ -77,6 +76,9 @@ class SaveToDbPipeline:
         item['priceHistory'] = old_item['priceHistory']
         item['lastUpdate'] = self.datestr
         item['inserted']  = old_item['inserted']
+
+        if 'addressData' in old_item:
+            item['addressData'] = old_item['addressData']
         
         if 'price' in item:
             if 'price' in old_item and old_item['price'] != item['price']:
