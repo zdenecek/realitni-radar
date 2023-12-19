@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia';
 
 import axios from '@/plugins/axios';
-import { json } from 'stream/consumers';
 import User from '@/class/User';
 
 export const useAuthStore = defineStore('auth', {
     state: () => {
         let user = null;
-        const userData =  sessionStorage.getItem('user');
+        const userData =  localStorage.getItem('user');
         if (userData) {
             const { username, name, role, email, id } = JSON.parse(userData);
             user = new User(id, name, username, email, role)
@@ -26,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
                 const response = await axios.post('/login/password', { username, password });
                 this.user = response.data.user;
                 this.isAuthenticated = true;
-                sessionStorage.user = JSON.stringify(this.user);
+                localStorage.user = JSON.stringify(this.user);
                 console.debug('Login successful:', this.user);
             } catch (error: any) {
                 console.error('Login error:', error.message);
@@ -38,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
                 await axios.post('/logout');
                 this.user = null;
                 this.isAuthenticated = false;
-                sessionStorage.removeItem('user');
+                localStorage.removeItem('user');
             }
             catch (error: any) {
                 console.error('Logout error:', error.message);

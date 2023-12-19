@@ -3,6 +3,7 @@
 
 const passport = require("passport");
 const router = require("express").Router();
+
 module.exports = router;
 
 const registerUser = require("../src/auth").registerUser;

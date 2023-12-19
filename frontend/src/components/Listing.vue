@@ -2,11 +2,16 @@
     <v-card class="listing" :class="{ deleted: deleted && !showDetails }">
         <div class="header">
             <div class="heading">
-                <span v-if="data?.deleted" class="label-deleted"> Smazaný inzerát </span>
-                {{ data?.title ?? "Inzerát" }}, {{ address }}
+                <div class="listing-title">
+                    <span v-if="data?.deleted" class="deleted"> Smazaný inzerát </span>
+                    <span> {{ data?.title ?? "Inzerát" }} </span>
+                </div>
+                <span class="address">{{ address }}</span>
             </div>
+
             <v-chip-group class="top-labels">
-                <v-chip v-if="data?.isFavorite"  append-icon="mdi-heart-outline"   class="top-label top-label-favorite text-secondary">
+                <v-chip v-if="data?.isFavorite" append-icon="mdi-heart-outline"
+                    class="top-label top-label-favorite text-secondary">
                     Oblíbený
                 </v-chip>
                 <v-chip v-if="data?.prop" :class="'top-label top-label-prop top-label-prop-' + data.prop" variant="flat">
@@ -33,42 +38,40 @@
                 <img loading="lazy" :src="image.gallery ?? image.view" />
             </div>
         </div>
-        <div class="overview">
-            <div class="listing-label price">
+        <div class="basic-overview">
+            <div class="listing-detail price">
                 <span>Cena</span>
                 <span>{{ price }}</span>
             </div>
-            <div class="listing-label" v-if="ownership">
-                <span>Vlastnictví</span>
-                <span>{{ ownership }}</span>
-            </div>
-            <div class="listing-label">
-                <span>Stáří</span>
-                <span>{{ ageString }}</span>
-            </div>
-            <div class="listing-label">
-                <span>Data</span>
-                <div class="dates">
-                    <div>
-                        <span>Vloženo</span>
-                        <span>{{ dateStr(data?.inserted) }}</span>
-                    </div>
-                    <div v-if="data?.lastUpdate">
-                        <span>Naposledy aktualizováno</span>
-                        <span>{{ dateStr(data?.lastUpdate) }}</span>
-                    </div>
-                    <div v-if="deleted">
-                        <span>Smazáno</span>
-                        <span>{{ dateStr(data?.deleted) }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="listing-label" v-if="priceDrop">
+            <div class="listing-detail" v-if="priceDrop">
                 <span>Sleva</span>
                 <span>{{ priceDrop }}</span>
             </div>
+            <div class="listing-detail" v-if="ownership">
+                <span>Vlastnictví</span>
+                <span>{{ ownership }}</span>
+            </div>
+            <div class="listing-detail">
+                <span>Stáří</span>
+                <span>{{ ageString }}</span>
+            </div>
+
+            <div class="listing-detail">
+                <span>Vloženo</span>
+                <span>{{ dateStr(data?.inserted) }}</span>
+            </div>
+            <div class="listing-detail" v-if="data?.lastUpdate && data.lastUpdate !== data.inserted">
+                <span>Naposledy aktualizováno</span>
+                <span>{{ dateStr(data?.lastUpdate) }}</span>
+            </div>
+            <div class="listing-detail" v-if="data?.deleted">
+                <span>Smazáno</span>
+                <span>{{ dateStr(data?.deleted) }}</span>
+            </div>
+
+
         </div>
-        <div class="actions text-small"  >
+        <div class="listing-actions text-small">
             <v-btn class="button" @click="toggleDetails" prepend-icon="mdi-eye-outline">Zobrazit podrobnosti</v-btn>
             <v-btn class="button" :href="webUrl" target="_blank">Otevřít na Sreality</v-btn>
             <v-btn class="button" @click="togglefavorites"
@@ -157,11 +160,12 @@ const ageString = computed(() => {
 
 const description = computed(() => props.data?.description ?? '-');
 const price = computed(() => {
-    let s = props.data?.price?.toLocaleString() + " Kč" ?? "-";
+    if (!props.data?.price && !props.data?.pricePerMeter) return "neuvedeno / v popisu";
+    let s = props.data?.price?.toLocaleString() + " Kč";
     if (props.data?.priceUnit) s += " " + props.data?.priceUnit;
     if (props.data?.pricePerMeter) s += ` (${Math.floor(props.data?.pricePerMeter).toLocaleString()} Kč/m²)`;
 
-    return props.data?.price ? s : "-";
+    return s;
 });
 const priceHistory = computed(() => props.data?.priceHistory);
 const ownership = computed(() => Ownership[props.data?.ownership] ?? false);
@@ -170,7 +174,7 @@ const address = computed(() => props.data?.address ?? props.data?.locality?.name
 const deleted = computed(() => props.data?.deleted);
 
 function toggleDetails() {
-    showDetails.value = ! showDetails.value;
+    showDetails.value = !showDetails.value;
 }
 
 function dateStr(date: string) {
@@ -211,7 +215,7 @@ function togglefavorites() {
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "../style/labels.scss";
 
 .listing {
@@ -232,18 +236,20 @@ function togglefavorites() {
 }
 
 .heading {
-    font-size: 1.5em;
     display: flex;
-    flex-direction: row;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 6px 4px;
+    padding-bottom: .5em;
 
-    .label-deleted {
+    .deleted {
         padding: 2px 6px;
         border-radius: 4px;
         font-size: 0.8em;
         font-weight: bold;
+    }
+
+    .listing-title {
+        font-size: 1.5em;
     }
 }
 
@@ -279,10 +285,10 @@ function togglefavorites() {
     }
 }
 
-.actions {
+.listing-actions {
     display: flex;
-    flex-flow: row;
     gap: 6px;
+    overflow-x: scroll;
 }
 
 .description {
@@ -305,6 +311,9 @@ function togglefavorites() {
         gap: 6px;
 
         .listing-label {
+            display: grid;
+            gap: 10px;
+
             background-color: #f2f2f2;
             grid-template-columns: 1fr 1fr;
         }
@@ -315,13 +324,13 @@ function togglefavorites() {
     }
 }
 
-.listing-label {
+.listing-detail {
     display: grid;
-    grid-template-columns: 100px auto;
+    grid-template-columns: 120px auto;
+    align-items: center;
     gap: 10px;
 
     &>span:first-child {
-        width: 100%;
         font-weight: bold;
         text-align: right;
     }
@@ -329,6 +338,10 @@ function togglefavorites() {
     &.description {
         text-justify: justify;
     }
+}
+
+.mobile .listing-detail {
+    display: flex;
 }
 
 .price {

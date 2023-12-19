@@ -1,11 +1,12 @@
 <template>
     <div class="flex-col filter">
-        <div class="flex flex-wrap">
+        <div class="flex flex-wrap align-center">
             <h2 class="mr-4">Filtr</h2>
-            <v-btn @click="clearFilter" size="small" prepend-icon="mdi-close" variant="outlined">Smazat
-                filtr</v-btn>
             <v-btn @click="visible = !visible" :text="visible ? 'Skrýt' : 'Zobrazit'" size="small"
-                :prepend-icon="visible ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" variant="outlined"></v-btn>
+                :prepend-icon="visible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'" variant="outlined"></v-btn>
+            <v-btn @click="clearFilter" v-show="visible" size="small" prepend-icon="mdi-close" variant="outlined">Smazat
+                filtr</v-btn>
+           
         </div>
         <div class="animation-wrapper">
             <Transition name="expand">
@@ -195,7 +196,14 @@ function clearFilter() {
 }
 
 // HIDE
-const visible = ref(true)
+const props = defineProps({
+    hideOnStart: {
+        type: Boolean,
+        default: false
+    }
+})
+const visible = ref(!props.hideOnStart)
+
 
 
 // SEARCH

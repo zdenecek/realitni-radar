@@ -1,28 +1,36 @@
 <template>
-    <div class="wrapper">
-        <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="blur">
+    <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="submit" class="form">
+        <form-card>
+            <template v-slot:header>
+                <h2>Registrace</h2>
+            </template>
 
-        <v-card class="auth-card">
-            <h2>Registrace</h2>
+            <v-text-field label="Jméno" name="name" v-model="name" :rules="nameRules" required density="comfortable"
+                :error-messages="errorMessages.name" @input="errorMessages.name = ''"></v-text-field>
+            <v-text-field label="Email" name='username' v-model="username" :rules="usernameRules" required
+                density="comfortable" :error-messages="errorMessages.username"
+                @input="errorMessages.username = ''"></v-text-field>
+            <v-text-field label="Heslo" name='password' type="password" v-model="password" :rules="passwordRules"
+                density="comfortable" :error-messages="errorMessages.password" @input="errorMessages.password = ''"
+                required></v-text-field>
+            <v-text-field label="Heslo znovu" type="password" v-model="password2" :rules="password2Rules"
+                density="comfortable" :error-messages="errorMessages.password" @input="errorMessages.password = ''"
+                required></v-text-field>
 
-            <div class="fields">
-                <v-text-field  label="Jméno" v-model="name" :rules="nameRules" required  :error-messages="errorMessages.name" @input="errorMessages.name = ''"></v-text-field>
-                <v-text-field  label="Email" v-model="username" :rules="usernameRules" required  :error-messages="errorMessages.username" @input="errorMessages.username = ''"></v-text-field>
-                <v-text-field label="Heslo" type="password" v-model="password" :rules="passwordRules" :error-messages="errorMessages.password" @input="errorMessages.password = ''"
-                    required></v-text-field>
-                <v-text-field label="Heslo znovu" type="password" v-model="password2" :rules="password2Rules" :error-messages="errorMessages.password" @input="errorMessages.password = ''"
-                    required></v-text-field>
-            </div>
+            <v-checkbox v-model="agree" :rules="agreeRules">
+                <template v-slot:label>
+                    <span>
+                        Souhlasím s <router-link :to="{ name: 'terms' }">obchodními podmínkami</router-link> a
+                        <router-link :to="{ name: 'privacy-policy' }">ochranou osobních údajů</router-link></span>
+                </template>
+            </v-checkbox>
 
-
-            <v-card-actions class="actions">
+            <template v-slot:actions>
                 <v-spacer></v-spacer>
-                <v-btn variant="text" type="submit" color="primary"  :disabled="!valid">Registrovat</v-btn>
-            </v-card-actions>
-        </v-card>
+                <v-btn variant="text" type="submit" color="primary" :disabled="progress">Registrovat</v-btn>
+            </template>
+        </form-card>
     </v-form>
-
-    </div>
 </template>
 
 <script setup lang="ts">
@@ -30,7 +38,8 @@ import { useAuthStore } from '@/stores/auth';
 import _ from 'lodash';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import {toast} from "@/plugins/toastify";
+import { toast } from "@/plugins/toastify";
+import FormCard from '@/components/partial/FormCard.vue';
 
 
 const authStore = useAuthStore();
@@ -41,6 +50,13 @@ const password = ref('');
 const password2 = ref('');
 const valid = ref(false);
 const form = ref(null as HTMLFormElement | null);
+const progress = ref(false);
+
+const agree = ref(false);
+
+const agreeRules = [
+    (v: boolean) => v || 'Musíte souhlasit s obchodními podmínkami a ochranou osobních údajů',
+];
 
 const usernameRules = [
     (v: string) => !!v || 'Vyplňte email nebo uživatelské jméno',
@@ -61,12 +77,14 @@ const password2Rules = [
 
 
 
-const errorMessages = ref({ } as any);
+const errorMessages = ref({} as any);
 const router = useRouter();
 
-const submit = _.throttle( async () => {
-    if (!form.value?.validate()) return;
+const submit = _.throttle(async () => {
+    const res = await form.value?.validate()
+    if (!res.valid) return;
     try {
+        progress.value = true;
         await authStore.register(username.value, name.value, password.value);
         toast("Registrace proběhla úspěšně. Nyní se můžete přihlásit.")
         router.push({ name: 'login' });
@@ -81,37 +99,9 @@ const submit = _.throttle( async () => {
         else {
             errorMessages.value = { username: 'Nastala chyba' };
         }
+    } finally {
+        progress.value = false;
     }
 }, 1000);
 
 </script>
-
-<style scoped>
-.auth-card {
-    width: 400px;
-    margin: 0 auto;
-    padding: 10px 20px;
-
-    justify-self: center;
-}
-
-.wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-}
-
-.actions {
-    display: flex;
-    justify-content: space-between;
-}
-
-.fields {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    margin: 20px 0;
-}
-</style>

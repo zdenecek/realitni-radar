@@ -6,6 +6,7 @@ axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 
 const instance = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL,
+    withCredentials: true,
 });
 
 export default instance;

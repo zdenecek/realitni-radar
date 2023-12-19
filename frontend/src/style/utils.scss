@@ -21,7 +21,6 @@
 
 .gap-1 {
     gap: 1em;
-
 }
 
 .overflow-hidden {
@@ -36,6 +35,12 @@
     padding: 0 !important;
 }
 
-.container {
-    max-width: 760px;
-}
+
+
+.space-between {
+    justify-content: space-between;
+  }
+  
+  .grow {
+    flex-grow: 1;
+  }

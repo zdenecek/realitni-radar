@@ -1,29 +1,30 @@
 <template>
-  <v-navigation-drawer class="pt-4" permanent>
+  <v-app-bar v-if="mobile && ! drawer" collapse>
 
-
+    <v-btn @click=" drawer = true"  prepend-icon="mdi-menu" text="Menu">
+    </v-btn>
+  </v-app-bar>
+  <v-navigation-drawer class="pt-4" v-model="drawer" :temporary="mobile" :permanent="!mobile">
     <v-list>
-      <v-list-item :to="{ name: 'home' }" :active="false" :ripple="false" id="logo">
+      <v-list-item :to="{ name: 'user-home' }" :active="false" :ripple="false" class="logo-header">
         <template v-slot:prepend>
           <v-avatar image="@/assets/logo.png" rounded="0" />
         </template>
-        <v-list-item-title id="logo-title">Realitní Radar</v-list-item-title>
+        <v-list-item-title class="logo-title title-logo">Realitní Radar</v-list-item-title>
       </v-list-item>
     </v-list>
 
     <v-divider></v-divider>
 
     <v-list nav density="compact">
-      <v-list-item prepend-icon="mdi-home-city-outline" title="Inzeráty" :to="{ name: 'listings' }" exact></v-list-item>
-      <v-list-item prepend-icon="mdi-city-variant-outline" title="Města" :to="{ name: 'listings-cities' }"></v-list-item>
+      <v-list-item prepend-icon="mdi-home-city-outline" title="Inzeráty" :to="{ name: 'listings' }" exact @click="hide"></v-list-item>
+      <v-list-item prepend-icon="mdi-city-variant-outline" title="Města" :to="{ name: 'listings-cities' }" @click="hide"></v-list-item>
       <v-list-item v-show="loggedIn" prepend-icon="mdi-heart-outline" title="Oblíbené"
         :to="{ name: 'favorites' }"></v-list-item>
-      <v-list-item prepend-icon="mdi-information-outline" title="O Aplikaci" :to="{ name: 'about' }"></v-list-item>
 
       <template v-if="auth.isAdmin">
         <v-divider></v-divider>
-        <v-list-item prepend-icon="mdi-account-group-outline" title="Uživatelé"
-        :to="{ name: 'users' }"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-group-outline" title="Uživatelé" :to="{ name: 'users' }"></v-list-item>
       </template>
     </v-list>
 
@@ -60,37 +61,46 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import DefaultView from './View.vue'
-
 
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { useDisplay } from 'vuetify';
+import { toast } from '@/plugins/toastify';
 
+const { mobile } = useDisplay()
 
 const auth = useAuthStore();
-
 const loggedIn = computed(() => auth.isAuthenticated);
 const user = computed(() => auth.user);
+
 
 const router = useRouter();
 
 async function logout() {
   await auth.logout();
   router.push({ name: 'home' });
+  toast("Byl/a jste odhlášen.")
+}
+
+const drawer = ref(false || !mobile.value);
+
+function hide() {
+  if (mobile.value) {
+    drawer.value = false;
+  }
 }
 
 </script>
 
 <style>
-#logo-title {
-  font-size: 1.2rem;
-  font-family: sans-serif;
+.title-logo {
+  font-size: 1.4rem;
   color: black;
-  font-weight: bold;
 }
 
-#logo {
+.logo-header {
   background-color: transparent !important;
 }
 
@@ -98,4 +108,11 @@ async function logout() {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
+
+.container {
+    max-width: 760px;
+}
+
+
+
 </style>

@@ -14,7 +14,7 @@
                 </template>
 
             </v-autocomplete>
-            <div v-show="!exact" class="flex align-center ml-4">
+            <div v-show="!exact" class="flex align-center gap-1 ml-4">
                 <span>v okruhu</span>
                 <v-text-field type="number" class="short" v-model="radius" :step="radius > 1 ? 1 : 0.1" min="0" />
                 <span>km</span>

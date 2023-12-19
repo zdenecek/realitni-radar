@@ -1,3 +1,5 @@
+# example nginx configuration
+
 server {
 
     root /var/www/radar;

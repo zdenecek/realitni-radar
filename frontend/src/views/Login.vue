@@ -1,30 +1,23 @@
 <template>
-    <div class="wrapper">
-        <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="blur">
-
-            <v-card class="auth-card">
+    <v-form ref="form" v-model="valid" @submit.prevent="submit" validate-on="submit" class="form flex">
+        <form-card>
+            <template v-slot:header>
                 <h2>Přihlášení</h2>
+            </template>
 
-                <div class="fields">
-                    <v-text-field label="Email" v-model="username" :rules="usernameRules" required
-                        :error-messages="errorMessages.username" @input="errorMessages.username = ''"></v-text-field>
-                    <v-text-field label="Heslo" type="password" v-model="password" :rules="passwordRules"
-                        :error-messages="errorMessages.password" @input="errorMessages.password = ''"
-                        required></v-text-field>
-                </div>
+                <v-text-field label="Email" v-model="username" :rules="usernameRules" required density="default"
+                    :error-messages="errorMessages.username" @input="errorMessages.username = ''"></v-text-field>
+                <v-text-field label="Heslo" type="password" v-model="password" :rules="passwordRules" density="default"
+                    :error-messages="errorMessages.password" @input="errorMessages.password = ''" required></v-text-field>
 
+            <template v-slot:actions>
+                <v-btn variant="text" size="large" :to="{ name: 'register' }">Registrace</v-btn>
 
-                <v-card-actions class="actions">
-                    <v-btn variant="text" :to="{ name: 'register' }">Registrace</v-btn>
-
-                    <v-spacer></v-spacer>
-                    <v-btn variant="text" type="submit" color="primary" :disabled="!valid">Přihlásit</v-btn>
-
-                </v-card-actions>
-            </v-card>
-        </v-form>
-
-    </div>
+                <v-spacer></v-spacer>
+                <v-btn variant="text" size="large" type="submit" color="primary" :disabled="progress">Přihlásit</v-btn>
+            </template>
+        </form-card>
+    </v-form>
 </template>
 
 <script setup lang="ts">
@@ -32,14 +25,15 @@ import { useAuthStore } from '@/stores/auth';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import FormCard from '@/components/partial/FormCard.vue';
 
 const authStore = useAuthStore();
 
 const username = ref('');
 const password = ref('');
-const valid = ref(false);
+const valid = ref(null);
 const form = ref(null as HTMLFormElement | null);
-
+const progress = ref(false);
 
 
 
@@ -58,12 +52,16 @@ const router = useRouter();
 const route = useRoute();
 
 const submit = _.throttle(async () => {
-    if (!form.value?.validate()) return;
+
+    const res = await form.value?.validate()
+    if (! res.valid) return;
     try {
+        progress.value = true;
         await authStore.login(username.value, password.value);
+        
         if (route.query.redirect)
             router.push(route.query.redirect as string);
-        else router.push({ name: 'home' });
+        else router.push({ name: 'user-home' });
 
     } catch (error: any) {
         if (error.response?.status === 401) {
@@ -75,37 +73,10 @@ const submit = _.throttle(async () => {
         else {
             errorMessages.value = { username: 'Nastala chyba' };
         }
+    } finally {
+        progress.value = false;
     }
+
 }, 1000);
 
 </script>
-
-<style scoped>
-.auth-card {
-    width: 400px;
-    margin: 0 auto;
-    padding: 10px 20px;
-
-    justify-self: center;
-}
-
-.wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-}
-
-.actions {
-    display: flex;
-    justify-content: space-between;
-}
-
-.fields {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    margin: 20px 0;
-}
-</style>

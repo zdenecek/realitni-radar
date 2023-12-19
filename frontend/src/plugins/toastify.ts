@@ -3,5 +3,5 @@
 import Toastify from 'toastify-js';
 
 export function toast(message: string, duration: number = 3000) {
-    Toastify({ text: message, duration }).showToast();
+    Toastify({ text: message, duration, position: 'center' }).showToast();
 }

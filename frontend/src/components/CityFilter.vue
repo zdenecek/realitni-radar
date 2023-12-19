@@ -17,7 +17,7 @@
 
         <div class="animation-wrapper">
             <transition name="expand">
-                <div class="form" v-show="visible">
+                <div class="form " v-show="visible">
                     <div>
                         <div class="label">Počet inzerátů ve městě</div>
                         <div class="flex align-center">

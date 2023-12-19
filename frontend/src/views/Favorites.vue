@@ -2,7 +2,7 @@
 <template>
     <div>
         <h1>Oblíbené inzeráty</h1>
-        <listings-view :show-city-filter="false" url="/favorites"></listings-view>
+        <listings-view :show-city-filter="false" url="/favorites" :hide-filter-on-start="true"></listings-view>
     </div>
 </template>
 

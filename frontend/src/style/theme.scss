@@ -2,3 +2,40 @@
 $primary-dark: #01579B;
 $primary: #1daeff;
 
+body {
+  font-family: Inter;
+ 
+}
+
+.logo-title {
+  font-family: Inter, Helvetica, sans-serif;
+}
+
+h1,
+h2 {
+  color: $primary-dark;
+}
+
+h1 {
+  font-size: 2em;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.6em;
+  font-weight: 600;
+
+}
+
+a.anchor {
+  color: $primary-dark;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+p {
+  margin-top: .5em;
+}

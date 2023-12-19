@@ -1,7 +1,7 @@
 <template>
     <div>
         <city-filter v-if="showCityFilter" @update="updateCities" class="mt-2 mb-2" :filter="filter"></city-filter>
-        <listings-filter @update="updateFilter" class="mt-2 mb-2"></listings-filter>
+        <listings-filter @update="updateFilter" :hide-on-start="hideFilterOnStart" class="mt-2 mb-2"></listings-filter>
         <div class="listings mt-4">
             <div class="listings" :class="{ 'blur-deleted': blurDeleted }">
                 <h2 id="listings">{{ listingsCount }} inzerátů</h2>
@@ -10,10 +10,11 @@
                 </v-pagination>
                 <loader v-show="loading">Načítání inzerátů...</loader>
 
-                <v-skeleton-loader v-for="n in 20" :key="n" v-if="loading"
-                    type="image, article"></v-skeleton-loader>
-                <listing v-if="!nextPageUsed" v-for="listing in responseData.listings" :data="listing" :key="listing['_id']" :autoexpand="expand"></listing>
-                <listing v-else v-for="listing in responseData.nextPage" :data="listing" :key="listing['_id']" :autoexpand="expand"></listing>
+                <v-skeleton-loader v-for="n in 20" :key="n" v-if="loading" type="image, article"></v-skeleton-loader>
+                <listing v-if="!nextPageUsed" v-for="listing in responseData.listings" :data="listing" :key="listing['_id']"
+                    :autoexpand="expand"></listing>
+                <listing v-else v-for="listing in responseData.nextPage" :data="listing" :key="listing['_id']"
+                    :autoexpand="expand"></listing>
                 <v-pagination v-show="pages > 1" v-model="page" :length="pages" density="compact" variant="outlined"
                     class="text-primary text-small" />
 
@@ -51,6 +52,10 @@ const props = defineProps({
         type: String,
         default: "listings",
     },
+    hideFilterOnStart: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 // LISTINGS
@@ -69,11 +74,14 @@ const page = ref(parseInt(route.query.p as string) || 1);
 const nextPageUsed = ref(false);
 
 watch(page, () => {
-    router.push({ query: { p: page.value } });
+    if (page.value === 1)
+        router.push({ query: { p: page.value } });
+    else
+        router.push({ query: { p: page.value }, hash: "#listings" });
 });
 watch(page, (newVal: number, oldVal: number) => {
-    if (page.value !== 1) location.hash = "#listings";
-    if (!nextPageUsed.value && newVal === oldVal+1) {
+
+    if (!nextPageUsed.value && newVal === oldVal + 1) {
         nextPageUsed.value = true;
     } else {
         loading.value = true;

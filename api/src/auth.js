@@ -3,11 +3,6 @@ const bcrypt = require('bcrypt')
 const LocalStrategy = require('passport-local').Strategy
 const User = require('../models/User'); // Import the User model
 
-const user = {
-    username: 'test-user',
-    passwordHash: 'bcrypt-hashed-password',
-    id: 1
-}
 
 function findUser(username, callback) {
     User.findOne({$or: [

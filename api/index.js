@@ -20,7 +20,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        sameSite: 'none',
+        sameSite: 'strict',
     }
 }))
 
@@ -31,8 +31,10 @@ app.use(passport.session())
 const routes = require("./routes/bussiness");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
+const statsRoutes = require("./routes/stats");
 app.use("/api", routes);
 app.use("/api", authRoutes);
+app.use("/api", statsRoutes);
 app.use("/api/admin", adminRoutes);
 
 const port = process.env.APP_PORT || 3000;

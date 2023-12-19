@@ -6,7 +6,29 @@ import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    component: () => import('@/layouts/default/Default.vue'),
+    component: () => import('@/layouts/Public.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/PublicHome.vue'),
+      },
+      {
+        path: '/obchodni-podminky',
+        name: 'terms',
+        component: () => import('@/views/Terms.vue'),
+      }
+      ,
+      {
+        path: '/zasady-ochrany-osobnich-udaju',
+        name: 'privacy-policy',
+        component: () => import('@/views/PrivacyPolicy.vue'),
+      }
+    ]
+  },
+  {
+    path: '/',
+    component: () => import('@/layouts/UserSection.vue'),
     beforeEnter: function(to: any, _: any, next: any) {
       if (to.query.id) {
         next({ path: `inzerat/${to.query.id}` });
@@ -16,8 +38,8 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: '',
-        name: 'home',
+        path: 'domu',
+        name: 'user-home',
         component: () => import('@/views/Home.vue'),
       },
       {
@@ -81,6 +103,13 @@ const routes: Array<RouteRecordRaw> = [
           admin: true
         }
       },
+    ],
+  },
+
+  {
+    path: '/',
+    component: () => import('@/layouts/Dialog.vue'),
+    children: [
       {
         name: 'login',
         path: '/prihlaseni',
@@ -97,20 +126,27 @@ const routes: Array<RouteRecordRaw> = [
           loggedOut: true
         }
       }
-    ],
-  },
+    ]
+  }
 ]
 
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+      }
+    }
+    return { top: 0 }
+  },
 })
 
 
 router.beforeEach((to, from) => {
   const userStore = useAuthStore()
-
 
   if (to.meta.loggedIn && !userStore.isAuthenticated) {
     return {
