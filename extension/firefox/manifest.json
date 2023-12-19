@@ -1,7 +1,7 @@
 {
-    "name": "Sreality manager extension",
-    "version": "1.0.1",
-    "description": "Open Sreality manager directly from Sreality listings",
+    "name": "Realitní radar pro Sreality.cz",
+    "version": "1.0.2",
+    "description": "Open Radar directly from Sreality listings",
     "permissions": ["activeTab"],
     "browser_action": {
         "default_icon": {
